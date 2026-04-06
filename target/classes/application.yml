@@ -1,0 +1,41 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: sendHelp
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/sendHelp
+    username: postgres
+    password: ROOT
+
+  jpa:
+    hibernate:
+      ddl-auto: update       # change to update in dev, validate in prod
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    open-in-view: false
+    properties:
+      hibernate:
+        format_sql: true
+        jdbc:
+          time_zone: UTC
+
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+
+  jackson:
+    time-zone: UTC
+    serialization:
+      write-dates-as-timestamps: false
+
+logging:
+  level:
+    org.springframework.security: DEBUG
+    org.hibernate.SQL: DEBUG
+
+app:
+  jwt:
+    secret: bb14f60a9baa17055727360932d110eb27bf9a95757d6b5f3392c8d74ce8eaef
+    access-token-expiration: 86400000
