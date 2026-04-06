@@ -6,6 +6,7 @@ import com.helpmeout.application.dto.SelectProviderRequest;
 import com.helpmeout.application.dto.TaskApplicationResponse;
 import com.helpmeout.application.entity.TaskApplication;
 import com.helpmeout.application.repository.TaskApplicationRepository;
+import com.helpmeout.chat.service.ChatService;
 import com.helpmeout.common.exception.BadRequestException;
 import com.helpmeout.common.exception.NotFoundException;
 import com.helpmeout.common.util.SecurityUtils;
@@ -39,6 +40,7 @@ public class TaskApplicationService {
     private final UserProfileRepository userProfileRepository;
     private final UserRepository userRepository;
     private final TaskStatusHistoryRepository taskStatusHistoryRepository;
+    private final ChatService chatService;
 
     @Transactional
     public TaskApplicationResponse applyToTask(Long taskId, ApplyToTaskRequest request) {
@@ -70,6 +72,7 @@ public class TaskApplicationService {
         application.setStatus(ApplicationStatus.PENDING);
 
         TaskApplication savedApplication = taskApplicationRepository.save(application);
+        chatService.createChatForApplication(savedApplication);
 
         if (task.getStatus() == TaskStatus.OPEN) {
             TaskStatus oldStatus = task.getStatus();
@@ -160,6 +163,8 @@ public class TaskApplicationService {
                 .orElseThrow(() -> new NotFoundException("User not found"));
 
         saveTaskStatusHistory(task, oldStatus, TaskStatus.PROVIDER_SELECTED, changedBy, "Provider selected");
+
+        chatService.closeNonSelectedChatsForTask(taskId, selectedApplication.getId());
 
         return mapToResponse(selectedApplication);
     }
